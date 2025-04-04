@@ -1,0 +1,138 @@
+
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Search, Menu, X, User } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+const Navbar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulating auth state
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  return (
+    <nav className="sticky top-0 z-50 w-full bg-white shadow-sm">
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="flex items-center space-x-2">
+          <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+            <span className="text-white font-bold text-lg">S</span>
+          </div>
+          <span className="text-xl font-bold text-gray-900">ScholarConnect</span>
+        </Link>
+
+        {/* Search - hidden on mobile */}
+        <div className="hidden md:flex relative max-w-md w-full mx-4">
+          <Input 
+            type="text" 
+            placeholder="Search for courses..." 
+            className="pl-9 pr-4 py-2 w-full"
+          />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+        </div>
+
+        {/* Desktop Menu */}
+        <div className="hidden md:flex items-center space-x-2">
+          <Link to="/courses" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+            Courses
+          </Link>
+          <Link to="/about" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+            About
+          </Link>
+          
+          {isLoggedIn ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <Link to="/dashboard" className="w-full">Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link to="/profile" className="w-full">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsLoggedIn(false)}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Button variant="ghost" onClick={() => setIsLoggedIn(true)}>
+                Login
+              </Button>
+              <Button className="bg-primary hover:bg-primary/90">
+                Sign Up
+              </Button>
+            </>
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden flex items-center">
+          <Button variant="ghost" size="icon" onClick={toggleMenu}>
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white py-4 px-4 shadow-lg animate-fade-in">
+          <div className="flex mx-auto mb-4">
+            <Input 
+              type="text" 
+              placeholder="Search for courses..." 
+              className="pl-9 pr-4 py-2 w-full"
+            />
+            <Search className="absolute left-7 top-[4.7rem] h-4 w-4 text-gray-500" />
+          </div>
+          <div className="flex flex-col space-y-3">
+            <Link to="/courses" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+              Courses
+            </Link>
+            <Link to="/about" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+              About
+            </Link>
+            {isLoggedIn ? (
+              <>
+                <Link to="/dashboard" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+                  Dashboard
+                </Link>
+                <Link to="/profile" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+                  Profile
+                </Link>
+                <Button variant="outline" onClick={() => setIsLoggedIn(false)}>
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <div className="flex flex-col space-y-2">
+                <Button variant="outline" onClick={() => setIsLoggedIn(true)}>
+                  Login
+                </Button>
+                <Button className="bg-primary hover:bg-primary/90">
+                  Sign Up
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+};
+
+export default Navbar;
