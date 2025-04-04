@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,23 @@ import { Eye, EyeOff, Mail, Lock, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import OTPInput from '@/components/OTPInput';
 
+// Demo credentials storage (in a real app, this would be in a database)
+const DEMO_USERS = [
+  { email: 'user@example.com', password: 'password123', name: 'Demo User' },
+  { email: 'admin@example.com', password: 'admin123', name: 'Admin User' },
+];
+
+// Check if we have users in localStorage, otherwise use default
+const getStoredUsers = () => {
+  const storedUsers = localStorage.getItem('users');
+  if (storedUsers) {
+    return JSON.parse(storedUsers);
+  }
+  // Initialize with demo users
+  localStorage.setItem('users', JSON.stringify(DEMO_USERS));
+  return DEMO_USERS;
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -32,20 +49,36 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
+  
+  // Load users from localStorage for demo purposes
+  useEffect(() => {
+    getStoredUsers();
+  }, []);
 
   const handleEmailLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate login
-    if (email && password) {
+    
+    // Check credentials against localStorage users
+    const users = getStoredUsers();
+    const user = users.find((u: any) => u.email === email && u.password === password);
+    
+    if (user) {
+      // Set logged in state in localStorage
+      localStorage.setItem('currentUser', JSON.stringify({
+        email: user.email,
+        name: user.name,
+        isLoggedIn: true
+      }));
+
       toast({
         title: "Login Successful",
-        description: "Welcome back to ScholarConnect!",
+        description: `Welcome back, ${user.name}!`,
       });
       navigate('/dashboard');
     } else {
       toast({
         title: "Login Failed",
-        description: "Please check your credentials and try again.",
+        description: "Invalid email or password. Please try again.",
         variant: "destructive",
       });
     }
@@ -59,6 +92,9 @@ const Login = () => {
         title: "OTP Sent",
         description: `A verification code has been sent to ${phoneNumber}`,
       });
+      
+      // Store phone number in session for demo purposes
+      sessionStorage.setItem('loginPhone', phoneNumber);
     } else {
       toast({
         title: "Invalid Phone Number",
@@ -70,6 +106,13 @@ const Login = () => {
 
   const handleVerifyOTP = () => {
     if (otp.length === 6) {
+      // Set logged in state in localStorage for demo
+      localStorage.setItem('currentUser', JSON.stringify({
+        phone: phoneNumber,
+        name: 'Phone User',
+        isLoggedIn: true
+      }));
+
       toast({
         title: "Login Successful",
         description: "Welcome back to ScholarConnect!",
@@ -173,6 +216,9 @@ const Login = () => {
                   <div className="space-y-2">
                     <Label>Enter OTP sent to {phoneNumber}</Label>
                     <OTPInput value={otp} onChange={setOtp} />
+                    <p className="text-xs text-center mt-2 text-muted-foreground">
+                      Demo OTP will appear in a toast notification
+                    </p>
                   </div>
                   <div className="flex justify-between">
                     <Button 

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Search, Menu, X, User, LogOut } from 'lucide-react';
@@ -12,12 +12,39 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 
+// Demo course data for search
+const DEMO_COURSES = [
+  { id: 1, title: 'Introduction to React', category: 'Web Development' },
+  { id: 2, title: 'Advanced JavaScript Patterns', category: 'Programming' },
+  { id: 3, title: 'Python for Data Science', category: 'Data Science' },
+  { id: 4, title: 'UI/UX Design Principles', category: 'Design' },
+  { id: 5, title: 'Machine Learning Basics', category: 'Artificial Intelligence' },
+  { id: 6, title: 'Cloud Computing Fundamentals', category: 'Cloud' },
+];
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulating auth state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<typeof DEMO_COURSES>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [userName, setUserName] = useState('');
+  
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check if user is logged in on component mount
+  useEffect(() => {
+    const user = localStorage.getItem('currentUser');
+    if (user) {
+      const userData = JSON.parse(user);
+      if (userData.isLoggedIn) {
+        setIsLoggedIn(true);
+        setUserName(userData.name || 'User');
+      }
+    }
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -32,12 +59,49 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('currentUser');
     setIsLoggedIn(false);
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
     });
     navigate('/');
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (searchQuery.trim().length === 0) {
+      setShowSearchResults(false);
+      return;
+    }
+
+    // Filter courses based on search query
+    const filtered = DEMO_COURSES.filter(course => 
+      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    setSearchResults(filtered);
+    setShowSearchResults(true);
+    
+    if (filtered.length === 0) {
+      toast({
+        title: "No Results",
+        description: `No courses found for "${searchQuery}"`,
+      });
+    } else {
+      toast({
+        title: "Search Results",
+        description: `Found ${filtered.length} courses for "${searchQuery}"`,
+      });
+    }
+  };
+
+  const navigateToCourse = (courseId: number) => {
+    setShowSearchResults(false);
+    setSearchQuery('');
+    navigate(`/courses/${courseId}`);
   };
 
   return (
@@ -53,12 +117,55 @@ const Navbar = () => {
 
         {/* Search - hidden on mobile */}
         <div className="hidden md:flex relative max-w-md w-full mx-4">
-          <Input 
-            type="text" 
-            placeholder="Search for courses..." 
-            className="pl-9 pr-4 py-2 w-full"
-          />
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+          <form onSubmit={handleSearch} className="w-full relative">
+            <Input 
+              type="text" 
+              placeholder="Search for courses..." 
+              className="pl-9 pr-4 py-2 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+            <Button 
+              type="submit" 
+              size="sm" 
+              className="absolute right-1 top-1 h-8"
+              variant="ghost"
+            >
+              Search
+            </Button>
+          </form>
+          
+          {/* Search results dropdown */}
+          {showSearchResults && searchResults.length > 0 && (
+            <div className="absolute top-full w-full bg-white shadow-lg rounded-md mt-1 p-2 border z-50">
+              <div className="flex justify-between items-center mb-2 pb-1 border-b">
+                <span className="font-medium text-sm">Search Results</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowSearchResults(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <ul>
+                {searchResults.map(course => (
+                  <li key={course.id} className="py-1">
+                    <button
+                      className="w-full text-left px-2 py-1.5 hover:bg-gray-100 rounded-md transition-colors flex items-start"
+                      onClick={() => navigateToCourse(course.id)}
+                    >
+                      <div>
+                        <p className="font-medium">{course.title}</p>
+                        <p className="text-sm text-gray-500">{course.category}</p>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Desktop Menu */}
@@ -113,6 +220,9 @@ const Navbar = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
+                  <div className="text-sm font-medium py-1">Hi, {userName}!</div>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
                   <Link to="/dashboard" className="w-full">Dashboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
@@ -147,14 +257,59 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-white py-4 px-4 shadow-lg animate-fade-in">
-          <div className="flex mx-auto mb-4">
+          <form onSubmit={handleSearch} className="flex mx-auto mb-4 relative">
             <Input 
               type="text" 
               placeholder="Search for courses..." 
-              className="pl-9 pr-4 py-2 w-full"
+              className="pl-9 pr-16 py-2 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Search className="absolute left-7 top-[4.7rem] h-4 w-4 text-gray-500" />
-          </div>
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+            <Button 
+              type="submit" 
+              size="sm" 
+              className="absolute right-1 top-1 h-8"
+              variant="ghost"
+            >
+              Search
+            </Button>
+          </form>
+          
+          {/* Search results for mobile */}
+          {showSearchResults && searchResults.length > 0 && (
+            <div className="bg-white shadow-inner rounded-md mt-1 p-2 border mb-4">
+              <div className="flex justify-between items-center mb-2 pb-1 border-b">
+                <span className="font-medium text-sm">Search Results</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowSearchResults(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <ul>
+                {searchResults.map(course => (
+                  <li key={course.id} className="py-1">
+                    <button
+                      className="w-full text-left px-2 py-1.5 hover:bg-gray-100 rounded-md transition-colors flex items-start"
+                      onClick={() => {
+                        navigateToCourse(course.id);
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <div>
+                        <p className="font-medium">{course.title}</p>
+                        <p className="text-sm text-gray-500">{course.category}</p>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
           <div className="flex flex-col space-y-3">
             <Link 
               to="/courses" 
@@ -202,6 +357,7 @@ const Navbar = () => {
             </Link>
             {isLoggedIn ? (
               <>
+                <div className="px-3 py-2 font-medium">Hi, {userName}!</div>
                 <Link 
                   to="/dashboard" 
                   className="px-3 py-2 text-gray-700 hover:text-primary transition-colors"
@@ -219,6 +375,7 @@ const Navbar = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => {
+                    localStorage.removeItem('currentUser');
                     setIsLoggedIn(false);
                     setIsMenuOpen(false);
                     toast({

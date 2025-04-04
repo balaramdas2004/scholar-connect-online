@@ -38,6 +38,23 @@ const Signup = () => {
     }
 
     if (name && email && password) {
+      // Save user to localStorage for demo purposes
+      const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      
+      // Check if email already exists
+      if (existingUsers.some((user: any) => user.email === email)) {
+        toast({
+          title: "Email Already Exists",
+          description: "This email is already registered. Please log in instead.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Add new user
+      existingUsers.push({ name, email, password });
+      localStorage.setItem('users', JSON.stringify(existingUsers));
+      
       toast({
         title: "Account Created",
         description: "Welcome to ScholarConnect! You can now log in.",

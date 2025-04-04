@@ -1,6 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
+import { toast } from '@/hooks/use-toast';
 
 interface OTPInputProps {
   value: string;
@@ -17,6 +18,24 @@ const OTPInput = ({ value, onChange, length = 6 }: OTPInputProps) => {
       inputRefs.current[0].focus();
     }
   }, []);
+
+  // Simulate OTP delivery when component mounts
+  useEffect(() => {
+    // Generate a random OTP
+    const simulatedOtp = Array.from({ length }, () => Math.floor(Math.random() * 10).toString()).join('');
+    
+    // Show toast with the OTP after a small delay
+    const timer = setTimeout(() => {
+      toast({
+        title: "OTP Generated (Demo)",
+        description: `Your OTP is: ${simulatedOtp}`,
+        duration: 10000,
+      });
+      console.log("Simulated OTP:", simulatedOtp);
+    }, 1500);
+    
+    return () => clearTimeout(timer);
+  }, [length]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const newValue = e.target.value;
