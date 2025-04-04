@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Search, Menu, X, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,7 @@ import {
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulating auth state
+  const location = useLocation();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -42,11 +43,45 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-2">
-          <Link to="/courses" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+          <Link 
+            to="/courses" 
+            className={`px-3 py-2 ${
+              location.pathname === '/courses' 
+                ? 'text-primary font-medium' 
+                : 'text-gray-700 hover:text-primary'
+            } transition-colors`}
+          >
             Courses
           </Link>
-          <Link to="/about" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+          <Link 
+            to="/about" 
+            className={`px-3 py-2 ${
+              location.pathname === '/about' 
+                ? 'text-primary font-medium' 
+                : 'text-gray-700 hover:text-primary'
+            } transition-colors`}
+          >
             About
+          </Link>
+          <Link 
+            to="/contact" 
+            className={`px-3 py-2 ${
+              location.pathname === '/contact' 
+                ? 'text-primary font-medium' 
+                : 'text-gray-700 hover:text-primary'
+            } transition-colors`}
+          >
+            Contact
+          </Link>
+          <Link 
+            to="/faq" 
+            className={`px-3 py-2 ${
+              location.pathname === '/faq' 
+                ? 'text-primary font-medium' 
+                : 'text-gray-700 hover:text-primary'
+            } transition-colors`}
+          >
+            FAQ
           </Link>
           
           {isLoggedIn ? (
@@ -100,30 +135,82 @@ const Navbar = () => {
             <Search className="absolute left-7 top-[4.7rem] h-4 w-4 text-gray-500" />
           </div>
           <div className="flex flex-col space-y-3">
-            <Link to="/courses" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+            <Link 
+              to="/courses" 
+              className={`px-3 py-2 ${
+                location.pathname === '/courses' 
+                  ? 'text-primary font-medium' 
+                  : 'text-gray-700 hover:text-primary'
+              } transition-colors`}
+              onClick={() => setIsMenuOpen(false)}
+            >
               Courses
             </Link>
-            <Link to="/about" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+            <Link 
+              to="/about" 
+              className={`px-3 py-2 ${
+                location.pathname === '/about' 
+                  ? 'text-primary font-medium' 
+                  : 'text-gray-700 hover:text-primary'
+              } transition-colors`}
+              onClick={() => setIsMenuOpen(false)}
+            >
               About
+            </Link>
+            <Link 
+              to="/contact" 
+              className={`px-3 py-2 ${
+                location.pathname === '/contact' 
+                  ? 'text-primary font-medium' 
+                  : 'text-gray-700 hover:text-primary'
+              } transition-colors`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact
+            </Link>
+            <Link 
+              to="/faq" 
+              className={`px-3 py-2 ${
+                location.pathname === '/faq' 
+                  ? 'text-primary font-medium' 
+                  : 'text-gray-700 hover:text-primary'
+              } transition-colors`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              FAQ
             </Link>
             {isLoggedIn ? (
               <>
-                <Link to="/dashboard" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+                <Link 
+                  to="/dashboard" 
+                  className="px-3 py-2 text-gray-700 hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   Dashboard
                 </Link>
-                <Link to="/profile" className="px-3 py-2 text-gray-700 hover:text-primary transition-colors">
+                <Link 
+                  to="/profile" 
+                  className="px-3 py-2 text-gray-700 hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   Profile
                 </Link>
-                <Button variant="outline" onClick={() => setIsLoggedIn(false)}>
+                <Button variant="outline" onClick={() => {
+                  setIsLoggedIn(false);
+                  setIsMenuOpen(false);
+                }}>
                   Logout
                 </Button>
               </>
             ) : (
               <div className="flex flex-col space-y-2">
-                <Button variant="outline" onClick={() => setIsLoggedIn(true)}>
+                <Button variant="outline" onClick={() => {
+                  setIsLoggedIn(true);
+                  setIsMenuOpen(false);
+                }}>
                   Login
                 </Button>
-                <Button className="bg-primary hover:bg-primary/90">
+                <Button className="bg-primary hover:bg-primary/90" onClick={() => setIsMenuOpen(false)}>
                   Sign Up
                 </Button>
               </div>

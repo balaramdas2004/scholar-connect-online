@@ -3,8 +3,25 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Facebook, Twitter, Instagram, Youtube, Mail } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const Footer = () => {
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (email) {
+      toast({
+        title: "Subscription Successful!",
+        description: "Thank you for subscribing to our newsletter.",
+      });
+      setEmail("");
+    }
+  };
+
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="container mx-auto px-4 py-12 md:py-16">
@@ -45,9 +62,6 @@ const Footer = () => {
                 <Link to="/courses" className="hover:text-white transition-colors">Courses</Link>
               </li>
               <li>
-                <Link to="/instructors" className="hover:text-white transition-colors">Instructors</Link>
-              </li>
-              <li>
                 <Link to="/about" className="hover:text-white transition-colors">About Us</Link>
               </li>
               <li>
@@ -64,7 +78,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-white mb-4">Resources</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="hover:text-white transition-colors">Help Center</a>
+                <Link to="/faq" className="hover:text-white transition-colors">Help Center</Link>
               </li>
               <li>
                 <a href="#" className="hover:text-white transition-colors">Student Forums</a>
@@ -87,19 +101,22 @@ const Footer = () => {
             <p className="text-sm mb-4">
               Subscribe to our newsletter to get updates on new courses, features and educational content.
             </p>
-            <div className="flex space-x-2">
+            <form onSubmit={handleSubscribe} className="flex space-x-2">
               <div className="relative flex-grow">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                 <Input 
                   type="email" 
                   placeholder="Your email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="pl-9 bg-gray-800 border-gray-700 text-white"
+                  required
                 />
               </div>
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button className="bg-primary hover:bg-primary/90" type="submit">
                 Subscribe
               </Button>
-            </div>
+            </form>
           </div>
         </div>
         
