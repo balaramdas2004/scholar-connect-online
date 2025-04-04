@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Search, Menu, X, User } from 'lucide-react';
+import { Search, Menu, X, User, LogOut } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
@@ -10,14 +10,34 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulating auth state
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
+  const handleSignUp = () => {
+    navigate('/signup');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+    navigate('/');
   };
 
   return (
@@ -98,17 +118,18 @@ const Navbar = () => {
                 <DropdownMenuItem>
                   <Link to="/profile" className="w-full">Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsLoggedIn(false)}>
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <>
-              <Button variant="ghost" onClick={() => setIsLoggedIn(true)}>
+              <Button variant="ghost" onClick={handleLogin}>
                 Login
               </Button>
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button className="bg-primary hover:bg-primary/90" onClick={handleSignUp}>
                 Sign Up
               </Button>
             </>
@@ -195,22 +216,41 @@ const Navbar = () => {
                 >
                   Profile
                 </Link>
-                <Button variant="outline" onClick={() => {
-                  setIsLoggedIn(false);
-                  setIsMenuOpen(false);
-                }}>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsLoggedIn(false);
+                    setIsMenuOpen(false);
+                    toast({
+                      title: "Logged Out",
+                      description: "You have been successfully logged out.",
+                    });
+                    navigate('/');
+                  }}
+                  className="flex items-center mt-2"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </Button>
               </>
             ) : (
               <div className="flex flex-col space-y-2">
-                <Button variant="outline" onClick={() => {
-                  setIsLoggedIn(true);
-                  setIsMenuOpen(false);
-                }}>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate('/login');
+                  }}
+                >
                   Login
                 </Button>
-                <Button className="bg-primary hover:bg-primary/90" onClick={() => setIsMenuOpen(false)}>
+                <Button 
+                  className="bg-primary hover:bg-primary/90" 
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate('/signup');
+                  }}
+                >
                   Sign Up
                 </Button>
               </div>
