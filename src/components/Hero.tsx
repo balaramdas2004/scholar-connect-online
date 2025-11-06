@@ -5,11 +5,11 @@ import { Search } from "lucide-react";
 
 const Hero = () => {
   return (
-    <div className="hero-gradient text-white">
-      <div className="container mx-auto px-4 py-16 md:py-24">
+    <div className="hero-gradient text-white lighting-effect texture-3d relative overflow-hidden">
+      <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="text-center md:text-left">
-            <h1 className="text-3xl md:text-5xl font-bold leading-tight">
+            <h1 className="text-3xl md:text-5xl font-bold leading-tight neon-glow">
               Unlock Your Learning Potential with ScholarConnect
             </h1>
             <p className="mt-4 text-lg md:text-xl text-blue-100">
@@ -17,15 +17,17 @@ const Hero = () => {
             </p>
             
             <div className="mt-8 relative max-w-md mx-auto md:mx-0">
-              <Input
-                type="text"
-                placeholder="What do you want to learn?"
-                className="pl-10 py-6 text-gray-900 border-0 shadow-lg"
-              />
-              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
-              <Button className="absolute right-1 top-1 bg-primary hover:bg-primary/90">
-                Search
-              </Button>
+              <div className="glass-morphism rounded-lg p-1 depth-shadow-hover">
+                <Input
+                  type="text"
+                  placeholder="What do you want to learn?"
+                  className="pl-10 py-6 text-gray-900 border-0 shadow-lg bg-white/95"
+                />
+                <Search className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
+                <Button className="absolute right-1 top-1 bg-primary hover:bg-primary/90 glow-effect">
+                  Search
+                </Button>
+              </div>
             </div>
             
             <div className="mt-8 flex flex-wrap gap-4 justify-center md:justify-start">
@@ -59,11 +61,13 @@ const Hero = () => {
           </div>
           
           <div className="hidden md:block">
-            <img
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80"
-              alt="Students learning"
-              className="rounded-lg shadow-xl"
-            />
+            <div className="card-3d depth-shadow-hover rounded-lg overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80"
+                alt="Students learning"
+                className="rounded-lg shadow-xl w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </div>

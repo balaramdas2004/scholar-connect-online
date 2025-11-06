@@ -21,23 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Mail, Lock, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import OTPInput from '@/components/OTPInput';
-
-// Demo credentials storage (in a real app, this would be in a database)
-const DEMO_USERS = [
-  { email: 'user@example.com', password: 'password123', name: 'Demo User' },
-  { email: 'admin@example.com', password: 'admin123', name: 'Admin User' },
-];
-
-// Check if we have users in localStorage, otherwise use default
-const getStoredUsers = () => {
-  const storedUsers = localStorage.getItem('users');
-  if (storedUsers) {
-    return JSON.parse(storedUsers);
-  }
-  // Initialize with demo users
-  localStorage.setItem('users', JSON.stringify(DEMO_USERS));
-  return DEMO_USERS;
-};
+import { getUserByEmail } from '@/lib/db';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -49,38 +33,44 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
-  
-  // Load users from localStorage for demo purposes
-  useEffect(() => {
-    getStoredUsers();
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleEmailLogin = (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
-    // Check credentials against localStorage users
-    const users = getStoredUsers();
-    const user = users.find((u: any) => u.email === email && u.password === password);
-    
-    if (user) {
-      // Set logged in state in localStorage
-      localStorage.setItem('currentUser', JSON.stringify({
-        email: user.email,
-        name: user.name,
-        isLoggedIn: true
-      }));
+    try {
+      const user = await getUserByEmail(email);
+      
+      if (user && user.password === password) {
+        // Set logged in state
+        localStorage.setItem('currentUser', JSON.stringify({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          isLoggedIn: true
+        }));
 
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${user.name}!`,
+        });
+        navigate('/dashboard');
+      } else {
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Login Successful",
-        description: `Welcome back, ${user.name}!`,
-      });
-      navigate('/dashboard');
-    } else {
-      toast({
-        title: "Login Failed",
-        description: "Invalid email or password. Please try again.",
+        title: "Error",
+        description: "An error occurred. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -128,8 +118,8 @@ const Login = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-screen">
-      <Card className="w-full max-w-md">
+    <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-screen texture-3d">
+      <Card className="w-full max-w-md card-3d depth-shadow-hover lighting-effect">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
           <CardDescription className="text-center">
@@ -187,7 +177,9 @@ const Login = () => {
                     </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full">Sign in with Email</Button>
+                <Button type="submit" className="w-full glow-effect" disabled={isLoading}>
+                  {isLoading ? 'Signing in...' : 'Sign in with Email'}
+                </Button>
               </form>
             </TabsContent>
             

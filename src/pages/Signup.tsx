@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
+import { createUser, getUserByEmail } from '@/lib/db';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -24,8 +25,9 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!agreedToTerms) {
@@ -38,28 +40,56 @@ const Signup = () => {
     }
 
     if (name && email && password) {
-      // Save user to localStorage for demo purposes
-      const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      
-      // Check if email already exists
-      if (existingUsers.some((user: any) => user.email === email)) {
+      if (password.length < 8) {
         toast({
-          title: "Email Already Exists",
-          description: "This email is already registered. Please log in instead.",
+          title: "Password Too Short",
+          description: "Password must be at least 8 characters long.",
           variant: "destructive",
         });
         return;
       }
+
+      setIsLoading(true);
       
-      // Add new user
-      existingUsers.push({ name, email, password });
-      localStorage.setItem('users', JSON.stringify(existingUsers));
-      
-      toast({
-        title: "Account Created",
-        description: "Welcome to ScholarConnect! You can now log in.",
-      });
-      navigate('/login');
+      try {
+        // Check if email already exists
+        const existingUser = await getUserByEmail(email);
+        
+        if (existingUser) {
+          toast({
+            title: "Email Already Exists",
+            description: "This email is already registered. Please log in instead.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        // Create new user
+        const newUser = await createUser({ name, email, password });
+        
+        if (newUser) {
+          toast({
+            title: "Account Created",
+            description: "Welcome to ScholarConnect! You can now log in.",
+          });
+          navigate('/login');
+        } else {
+          toast({
+            title: "Signup Failed",
+            description: "Failed to create account. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "An error occurred. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       toast({
         title: "Signup Failed",
@@ -70,8 +100,8 @@ const Signup = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-screen">
-      <Card className="w-full max-w-md">
+    <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-screen texture-3d">
+      <Card className="w-full max-w-md card-3d depth-shadow-hover lighting-effect">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
           <CardDescription className="text-center">
@@ -158,7 +188,9 @@ const Signup = () => {
               </label>
             </div>
             
-            <Button type="submit" className="w-full">Create Account</Button>
+            <Button type="submit" className="w-full glow-effect" disabled={isLoading}>
+              {isLoading ? 'Creating Account...' : 'Create Account'}
+            </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">

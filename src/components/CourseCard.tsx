@@ -44,7 +44,7 @@ const CourseCard: React.FC<CourseProps> = ({
   };
   
   return (
-    <Card className="overflow-hidden course-card">
+    <Card className="overflow-hidden course-card card-3d depth-shadow-hover lighting-effect">
       <div className="relative h-40 overflow-hidden">
         <img
           src={image}

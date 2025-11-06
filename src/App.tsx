@@ -17,6 +17,12 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
+import ChatBot from "./components/ChatBot";
+import { initializeCourses, initializeDemoUsers } from "./lib/initData";
+
+// Initialize sample data on app load
+initializeCourses();
+initializeDemoUsers();
 
 const queryClient = new QueryClient();
 
@@ -43,6 +49,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <ChatBot />
       </TooltipProvider>
     </BrowserRouter>
   </QueryClientProvider>
